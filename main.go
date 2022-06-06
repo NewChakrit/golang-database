@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 
 	_ "github.com/denisenkom/go-mssqldb"
@@ -18,9 +19,15 @@ var db *sql.DB
 
 func main() {
 	var err error
-	db, err = sql.Open("sqlserver", "sqlserver://sa:P@ssw0rd@13.76.163.73?param1=value&database=techcoach")
-	// db, err = sql.Open("mysql", "root:P@ssw0rd@tcp(13.76.163.73)/techcoach")
+	// db, err = sql.Open("sqlserver", "sqlserver://sa:P@ssw0rd@13.76.163.73?param1=value&database=techcoach")
+	db, err = sql.Open("mysql", "root:P@ssw0rd@tcp(13.76.163.73)/techcoach")
 
+	if err != nil {
+		panic(err)
+	}
+
+	cover := Cover{9, "New"}
+	err = AddCover(cover)
 	if err != nil {
 		panic(err)
 	}
@@ -30,10 +37,16 @@ func main() {
 		fmt.Print(err)
 		return
 	}
-
 	for _, cover := range covers {
 		fmt.Println(cover)
 	}
+
+	// ------ MSSQL SERVER -----
+	// cover, err := GetCover(1)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Println(cover)
 
 }
 
@@ -73,5 +86,37 @@ func GetCover(id int) (*Cover, error) {
 		return nil, err
 	}
 
-	query := "select id, name from cover where id=@id" //@id ตั้งชื่อให้ตรงกับ column นั้นๆ
+	// ----- MSSQL SERVER -----
+	// query := "select id, name from cover where id=@id" //@id ตั้งชื่อให้ตรงกับ column นั้นๆ
+	// row := db.QueryRow(query, sql.Named("id", id))
+
+	// ----- MYSQL  -----
+	query := "select id, name from cover where id=?" //@id ตั้งชื่อให้ตรงกับ column นั้นๆ
+	row := db.QueryRow(query, id)
+
+	cover := Cover{}
+	err = row.Scan(&cover.Id, &cover.Name)
+	if err != nil {
+		return nil, err
+	}
+	return &cover, nil //ส่งตำแหน่ง cover ไป
+}
+
+func AddCover(cover Cover) error {
+	query := "insert into cover (id, name) values (?,?)"
+	result, err := db.Exec(query, cover.Id, cover.Name)
+	if err != nil {
+		return err
+	}
+
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if affected <= 0 {
+		return errors.New("Cannot insert")
+	}
+
+	return nil
 }
