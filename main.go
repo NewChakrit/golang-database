@@ -59,6 +59,7 @@ func main() {
 	// 	fmt.Println(cover)
 	// }
 
+	// SqlX
 	covers, err := GetCoversX()
 	if err != nil {
 		fmt.Print(err)
@@ -68,6 +69,14 @@ func main() {
 		fmt.Println(cover)
 	}
 
+	cover, err := GetCoverX(1)
+	if err != nil {
+		fmt.Print(err)
+		return
+	}
+
+	fmt.Println(cover)
+
 	// ------ MSSQL SERVER -----
 	// cover, err := GetCover(1)
 	// if err != nil {
@@ -75,18 +84,6 @@ func main() {
 	// }
 	// fmt.Println(cover)
 
-}
-
-// ----- SqlX Select -----
-
-func GetCoversX() ([]Cover, error) {
-	query := "select id,name from cover"
-	covers := []Cover{}
-	err := db.Select(&covers, query)
-	if err != nil {
-		return nil, err
-	}
-	return covers, nil
 }
 
 func GetCovers() ([]Cover, error) {
@@ -142,9 +139,18 @@ func GetCover(id int) (*Cover, error) {
 }
 
 func AddCover(cover Cover) error {
-	query := "insert into cover (id, name) values (?,?)"
-	result, err := db.Exec(query, cover.Id, cover.Name)
+
+	// syntax transaction
+
+	tx, err := db.Begin()
 	if err != nil {
+		return err
+	}
+
+	query := "insert into cover (id, name) values (?,?)"
+	result, err := tx.Exec(query, cover.Id, cover.Name)
+	if err != nil {
+		tx.Rollback()
 		return err
 	}
 
@@ -155,6 +161,11 @@ func AddCover(cover Cover) error {
 
 	if affected <= 0 {
 		return errors.New("Cannot insert")
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -196,4 +207,26 @@ func DeleteCover(id int) error {
 	}
 
 	return nil
+}
+
+// ----- SqlX Select -----
+
+func GetCoversX() ([]Cover, error) {
+	query := "select id,name from cover"
+	covers := []Cover{}
+	err := db.Select(&covers, query)
+	if err != nil {
+		return nil, err
+	}
+	return covers, nil
+}
+
+func GetCoverX(id int) (*Cover, error) {
+	query := "select id,name from cover where id=?"
+	cover := Cover{}
+	err := db.Get(&cover, query, id)
+	if err != nil {
+		return nil, err
+	}
+	return &cover, nil
 }
