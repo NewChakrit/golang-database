@@ -26,8 +26,14 @@ func main() {
 		panic(err)
 	}
 
-	cover := Cover{9, "New"}
-	err = AddCover(cover)
+	// cover := Cover{9, "New"}
+	// err = AddCover(cover)
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	cover := Cover{9, "Chakrit"}
+	err = UpdateCover(cover)
 	if err != nil {
 		panic(err)
 	}
@@ -116,6 +122,25 @@ func AddCover(cover Cover) error {
 
 	if affected <= 0 {
 		return errors.New("Cannot insert")
+	}
+
+	return nil
+}
+
+func UpdateCover(cover Cover) error {
+	query := "update cover set name=? where id=?"
+	result, err := db.Exec(query, cover.Name, cover.Id)
+	if err != nil {
+		return err
+	}
+
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if affected <= 0 {
+		return errors.New("Cannot update")
 	}
 
 	return nil
