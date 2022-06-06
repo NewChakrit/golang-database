@@ -140,7 +140,7 @@ func GetCover(id int) (*Cover, error) {
 
 func AddCover(cover Cover) error {
 
-	// ---- Syntax transaction ----
+	//  Syntax transaction
 
 	tx, err := db.Begin()
 	if err != nil {
