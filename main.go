@@ -26,14 +26,22 @@ func main() {
 		panic(err)
 	}
 
+	// ----- Add (Insert) ----
 	// cover := Cover{9, "New"}
 	// err = AddCover(cover)
 	// if err != nil {
 	// 	panic(err)
 	// }
 
-	cover := Cover{9, "Chakrit"}
-	err = UpdateCover(cover)
+	// ----- Edit (Update) -----
+	// cover := Cover{9, "Chakrit"}
+	// err = UpdateCover(cover)
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	// ----- Delete (Delete) -----
+	err = DeleteCover(9)
 	if err != nil {
 		panic(err)
 	}
@@ -141,6 +149,25 @@ func UpdateCover(cover Cover) error {
 
 	if affected <= 0 {
 		return errors.New("Cannot update")
+	}
+
+	return nil
+}
+
+func DeleteCover(id int) error {
+	query := "delete from cover where id?"
+	result, err := db.Exec(query, id)
+	if err != nil {
+		return err
+	}
+
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if affected <= 0 {
+		return errors.New("Cannot delete")
 	}
 
 	return nil
