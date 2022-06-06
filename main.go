@@ -18,8 +18,8 @@ var db *sql.DB
 
 func main() {
 	var err error
-	// db, err = sql.Open("sqlserver", "sqlserver://sa:P@ssw0rd@13.76.163.73?param1=value&database=techcoach")
-	db, err = sql.Open("mysql", "root:P@ssw0rd@tcp(13.76.163.73)/techcoach")
+	db, err = sql.Open("sqlserver", "sqlserver://sa:P@ssw0rd@13.76.163.73?param1=value&database=techcoach")
+	// db, err = sql.Open("mysql", "root:P@ssw0rd@tcp(13.76.163.73)/techcoach")
 
 	if err != nil {
 		panic(err)
@@ -65,4 +65,13 @@ func GetCovers() ([]Cover, error) {
 	}
 
 	return covers, nil
+}
+
+func GetCover(id int) (*Cover, error) {
+	err := db.Ping()
+	if err != nil {
+		return nil, err
+	}
+
+	query := "select id, name from cover where id=@id" //@id ตั้งชื่อให้ตรงกับ column นั้นๆ
 }
