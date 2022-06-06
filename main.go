@@ -1,12 +1,13 @@
 package main
 
 import (
-	"database/sql"
+	// "database/sql"
 	"errors"
 	"fmt"
 
 	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 )
 
 //  ------ Code style Guard Pattern ------
@@ -15,12 +16,15 @@ type Cover struct {
 	Name string
 }
 
-var db *sql.DB
+// var db *sql.DB
+var db *sqlx.DB
 
 func main() {
 	var err error
 	// db, err = sql.Open("sqlserver", "sqlserver://sa:P@ssw0rd@13.76.163.73?param1=value&database=techcoach")
-	db, err = sql.Open("mysql", "root:P@ssw0rd@tcp(13.76.163.73)/techcoach")
+	// db, err = sql.Open("mysql", "root:P@ssw0rd@tcp(13.76.163.73)/techcoach")
+
+	db, err = sqlx.Open("mysql", "root:P@ssw0rd@tcp(13.76.163.73)/techcoach")
 
 	if err != nil {
 		panic(err)
@@ -46,7 +50,16 @@ func main() {
 		panic(err)
 	}
 
-	covers, err := GetCovers()
+	// covers, err := GetCovers()
+	// if err != nil {
+	// 	fmt.Print(err)
+	// 	return
+	// }
+	// for _, cover := range covers {
+	// 	fmt.Println(cover)
+	// }
+
+	covers, err := GetCoversX()
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -62,6 +75,18 @@ func main() {
 	// }
 	// fmt.Println(cover)
 
+}
+
+// ----- SqlX Select -----
+
+func GetCoversX() ([]Cover, error) {
+	query := "select id,name from cover"
+	covers := []Cover{}
+	err := db.Select(&covers, query)
+	if err != nil {
+		return nil, err
+	}
+	return covers, nil
 }
 
 func GetCovers() ([]Cover, error) {
